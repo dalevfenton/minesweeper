@@ -18,6 +18,7 @@ class GameBoard extends Component {
   constructor (props){
     super(props)
     this.showCell = this.showCell.bind(this)
+    this.clearCells = this.clearCells.bind(this)
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
     this.getCells = this.getCells.bind(this)
@@ -27,16 +28,16 @@ class GameBoard extends Component {
     }
   }
 
-  isWin () {
-    let cells = this.state.cells;
-    let numLeft = cells.reduce(function(accum, cell, index){
-      if(cell.isMine && cell.status === "show"){
-        return accum.push(index);
+  isWin (cellArray) {
+    let numLeft = cellArray.reduce(function(accum, cell, index){
+      if(cell.status === "hidden"){
+        return [...accum, index];
       }else{
         return accum;
       }
     }, []);
-    if(numLeft.length===this.props.numMines ? true : false){
+
+    if(numLeft.length===this.props.data.numMines ? true : false){
       this.setState({status: 'win'});
       return true;
     }else{
@@ -47,7 +48,7 @@ class GameBoard extends Component {
   isLoss ( cellId ){
     let cells = this.state.cells;
     if(cells[cellId].isMine){
-      //set game to over and show all
+      //set game to loss and show all cells
       cells.forEach(function(cell){
         cell.status = "show";
       })
@@ -59,14 +60,30 @@ class GameBoard extends Component {
   }
 
   showCell ( cellId ){
-    let cells = this.state.cells;
-    if( !( this.isLoss(cellId) || this.isWin() ) ){
+    if(this.state.status==="active"){
+      let cells = this.state.cells;
       cells[cellId].status = "show";
-      if(cells[cellId].numMines === 0){
-        //clear all surrounding cells (recursively)
+      if( !( this.isLoss(cellId) || this.isWin(cells) ) ){
+        console.log(cells[cellId]);
+        if(cells[cellId].mineCount === 0){
+          //clear all surrounding cells (recursively)
+          console.log('clearCells called');
+          cells = this.clearCells( cellId, cells);
+        }
+        this.setState({cells: cells});
       }
-      this.setState({cells: cells});
     }
+  }
+
+  clearCells ( cellId, cellArray ){
+    let clearCells = this.getCells(cellId);
+    clearCells.forEach(function(subCellId) {
+      cellArray[subCellId].status = "show";
+      if( cellArray[subCellId].mineCount === 0 && cellArray[subCellId].status === "hidden" ){
+        cellArray = this.clearCells(subCellId, cellArray);
+      }
+    }.bind(this));
+    return cellArray;
   }
 
   getCells ( cellId ){
