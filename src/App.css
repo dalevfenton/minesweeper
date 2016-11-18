@@ -1,0 +1,50 @@
+* {
+  box-sizing: border-box;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.App {
+  width: 904px;
+  border: 2px solid black;
+}
+
+.MenuContainer, .CustomSettingsModal {
+  text-align: center;
+  width: 300px;
+  background: black;
+  padding: 10px;
+  margin: 0 auto;
+  color: white;
+}
+
+.MenuContainer li, .CustomSettingsModal input {
+  cursor: pointer;
+  display: block;
+  width: 80%;
+  margin: 5px auto;
+  text-align: center;
+  background: red;
+  color: white;
+  padding: 5px;
+  border: 1px solid white;
+}
+
+.GameBoard {
+  margin: 0 auto;
+}
+
+.GameBoardCell {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #222222;
+  vertical-align: top;
+  background: #777777;
+  text-align: center;
+  line-height: 30px;
+}
