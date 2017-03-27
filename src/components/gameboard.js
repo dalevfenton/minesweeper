@@ -22,9 +22,11 @@ class GameBoard extends Component {
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
     this.getCells = this.getCells.bind(this)
+    this.startAtZero = this.startAtZero.bind(this)
     this.state = {
       cells : [],
       status: 'active',
+      started: false,
     }
   }
 
@@ -49,10 +51,7 @@ class GameBoard extends Component {
     let cells = this.state.cells;
     if(cells[cellId].isMine){
       //set game to loss and show all cells
-      cells.forEach(function(cell){
-        cell.status = "show";
-      })
-      this.setState({status: 'loss', cells: cells});
+      this.setState({status: 'loss'});
       return true;
     }else{
       return false;
@@ -60,27 +59,34 @@ class GameBoard extends Component {
   }
 
   showCell ( cellId ){
+    //if this is the first cell clicked, we need to make sure we start
+    //on a zero mine cell
+    if(!this.state.started){
+      this.startAtZero( cellId );
+      return;
+    }
+    //clear the cell
     if(this.state.status==="active"){
       let cells = this.state.cells;
       cells[cellId].status = "show";
       if( !( this.isLoss(cellId) || this.isWin(cells) ) ){
-        console.log(cells[cellId]);
         if(cells[cellId].mineCount === 0){
           //clear all surrounding cells (recursively)
-          console.log('clearCells called');
-          cells = this.clearCells( cellId, cells);
+          cells = this.clearCells( cellId, cells, []);
         }
         this.setState({cells: cells});
       }
     }
   }
 
-  clearCells ( cellId, cellArray ){
+  clearCells ( cellId, cellArray, checked ){
+    let accum = checked || [];
     let clearCells = this.getCells(cellId);
     clearCells.forEach(function(subCellId) {
       cellArray[subCellId].status = "show";
-      if( cellArray[subCellId].mineCount === 0 && cellArray[subCellId].status === "hidden" ){
-        cellArray = this.clearCells(subCellId, cellArray);
+      if( cellArray[subCellId].mineCount === 0 && accum.indexOf(subCellId) === -1 ){
+        accum.push(subCellId);
+        cellArray = this.clearCells(subCellId, cellArray, accum);
       }
     }.bind(this));
     return cellArray;
@@ -133,6 +139,8 @@ class GameBoard extends Component {
 
     cellArray.forEach(function(cell, index, array){
       let mineCount = 0;
+      //returns the valid cells around this one in the matrix
+      //( filters out non-proximate cells on edges & corners )
       let cellsAround = this.getCells(index);
       cellsAround.forEach(function(cellId){
         if(array[cellId].isMine){
@@ -144,12 +152,48 @@ class GameBoard extends Component {
     return cellArray;
   }
 
+  startAtZero( cellId ){
+      //get current cells
+      let cells = this.state.cells;
+      //get cells to clear out
+      let cellsAround = this.getCells(cellId);
+      cellsAround.push(cellId);
+      //get list of current zero cells making sure
+      //to exclude cells in the group we are clearing
+      let emptyCells = cells.reduce( (accum, cell, index)=>{
+        if(cell.isMine === false && cellsAround.indexOf(index) === -1){
+          return [...accum, cell];
+        }else{
+          return accum;
+        }
+      }, []);
+      //for each cell in the group to clear we swap its
+      //isMine property with one from an empty cell
+      cellsAround.forEach( (id) => {
+        if(cells[id].isMine){
+          //pick a random cell in the array of empty cells
+          let replaceId = Math.floor( Math.random() * emptyCells.length-1 );
+          //remove it from the array so we don't pick it twice
+          let replaceCell = emptyCells.splice(replaceId, 1)[0];
+          //swap the values
+          cells[id].isMine = false;
+          cells[replaceCell.id].isMine = true;
+        }
+      });
+      //reset the counted values of mines based on the new array
+      cells = this.countMines(cells);
+      cells[cellId].status = "show";
+      cells = this.clearCells( cellId, cells);
+      //reset state and then clear the original cell that was clicked
+      this.setState({ cells: cells, started: true });
+  }
+
   componentWillMount(){
     const length = this.props.data.width * this.props.data.height;
     let cells = [];
     for(let i = 0; i < length; i++){
       let isMine = i<this.props.data.numMines ? true : false;
-      cells.push({isMine: isMine, status: 'hidden'});
+      cells.push({isMine: isMine, status: 'hidden', id: i});
     }
     cells = arrayShuffle(cells);
     cells = this.countMines(cells);
@@ -158,7 +202,7 @@ class GameBoard extends Component {
 
   render(){
     let cells = this.state.cells.map(function(cell, index){
-      return (<Cell data={cell} key={index} index={index} showCell={this.showCell} />);
+      return (<Cell data={cell} key={index} index={index} showCell={this.showCell} gameStatus={this.state.status} />);
     }.bind(this));
     let style = {
       width: (30*this.props.data.width) + 'px',

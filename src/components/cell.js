@@ -17,17 +17,17 @@ class Cell extends Component {
 
   render(){
     let className = "GameBoardCell";
-
+    let cellText = this.props.data.mineCount === 0 ? "" : this.props.data.mineCount;
     this.props.data.status==="hidden" ? className+=" HiddenCell" : className += " ShowCell";
-    if(this.props.data.status==="hidden"){
+    if(this.props.data.status==="hidden" && this.props.gameStatus==='active'){
       return (
-        <div className={className + " HiddenCell"} onClick={this.show}>
+        <div className={className} onClick={this.show}>
         </div>
       );
     }else{
       return (
         <div className={className}>
-          {this.props.data.isMine ? 'X' : this.props.data.mineCount}
+          {this.props.data.isMine ? 'X' : cellText}
         </div>
       );
     }
