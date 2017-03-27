@@ -18,6 +18,7 @@ class GameBoard extends Component {
   constructor (props){
     super(props)
     this.showCell = this.showCell.bind(this)
+    this.flagCell = this.flagCell.bind(this)
     this.clearCells = this.clearCells.bind(this)
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
@@ -76,6 +77,15 @@ class GameBoard extends Component {
         }
         this.setState({cells: cells});
       }
+    }
+  }
+
+  flagCell ( cellId ){
+    //flag the cell
+    if(this.state.status==="active"){
+      let cells = this.state.cells;
+      cells[cellId].status = "flagged";
+      this.setState({cells: cells});
     }
   }
 
@@ -202,7 +212,10 @@ class GameBoard extends Component {
 
   render(){
     let cells = this.state.cells.map(function(cell, index){
-      return (<Cell data={cell} key={index} index={index} showCell={this.showCell} gameStatus={this.state.status} />);
+      return (<Cell data={cell} key={index} index={index}
+        showCell={this.showCell} flagCell={this.flagCell}
+        gameStatus={this.state.status}
+        />);
     }.bind(this));
     let style = {
       width: (30*this.props.data.width) + 'px',

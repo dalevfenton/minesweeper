@@ -60,3 +60,7 @@ ul {
 .ShowCell {
   background: #dddddd;
 }
+
+.FlaggedCell {
+  background: #ff2222;
+}
