@@ -19,6 +19,7 @@ class GameBoard extends Component {
     super(props)
     this.showCell = this.showCell.bind(this)
     this.flagCell = this.flagCell.bind(this)
+    this.doubleClickCell = this.doubleClickCell.bind(this)
     this.clearCells = this.clearCells.bind(this)
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
@@ -33,7 +34,7 @@ class GameBoard extends Component {
 
   isWin (cellArray) {
     let numLeft = cellArray.reduce(function(accum, cell, index){
-      if(cell.status === "hidden"){
+      if(cell.status !== "show"){
         return [...accum, index];
       }else{
         return accum;
@@ -51,11 +52,27 @@ class GameBoard extends Component {
   isLoss ( cellId ){
     let cells = this.state.cells;
     if(cells[cellId].isMine){
-      //set game to loss and show all cells
+      //set game to loss
       this.setState({status: 'loss'});
       return true;
     }else{
       return false;
+    }
+  }
+
+  handleCellClick( cellId, clickType ){
+    switch (clickType) {
+      case 'leftClick':
+        this.showCell(cellId);
+        break;
+      case 'rightClick':
+        this.flagCell(cellId);
+        break;
+      case 'doubleClick':
+        this.doubleClickCell(cellId);
+        break;
+      default:
+        console.log('handleCellClick did not get a valid clickType');
     }
   }
 
@@ -84,8 +101,31 @@ class GameBoard extends Component {
     //flag the cell
     if(this.state.status==="active"){
       let cells = this.state.cells;
-      cells[cellId].status = "flagged";
+      if(cells[cellId].status === "hidden"){
+        cells[cellId].status = "flagged";
+      }else{
+        cells[cellId].status = "hidden";
+      }
       this.setState({cells: cells});
+    }
+  }
+
+  doubleClickCell ( cellId ){
+    //clears all cells around the double clicked cell, if enough
+    //surrounding cells have been flagged
+    //can cause a win or loss
+    let cellsAround = this.getCells( cellId );
+    let cells = this.state.cells;
+    let flaggedCells = cellsAround.reduce( ( accum, aroundCellId, index ) => {
+      if( cells[aroundCellId].status === "flagged"){
+        accum.push(aroundCellId);
+      }
+      return accum;
+    }, []]);
+    if( flaggedCells.length === cells[cellId].mineCount){
+      flaggedCells.forEach( (cellId) => {
+        //set each to 'show' and check for loss
+      });
     }
   }
 
@@ -102,6 +142,8 @@ class GameBoard extends Component {
     return cellArray;
   }
 
+  //returns an array of indices representing the cells surrounding
+  //the cell at cellId
   getCells ( cellId ){
     let cellsAround = [];
     const width = this.props.data.width;

@@ -1,26 +1,72 @@
 import React, { Component } from 'react';
 import '../App.css';
 
-function isRMB(e){
-  let isRMB;
-  if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-      isRMB = e.which === 3;
-  else if ("button" in e)  // IE, Opera
-      isRMB = e.button === 2;
-  return isRMB;
-}
+// function getButton(e){
+//   let event = e || window.event;
+//   let code;
+//   console.log({button: e.button, which: e.which, buttons: e.buttons});
+//   if ("which" in event){  // IE, Opera
+//       if(event.which === 3){
+//         code = 'RMB';
+//       }
+//       if(event.which === 1){
+//         code = 'LMB';
+//       }else{
+//         code = 'Other';
+//       }
+//   }else if ("button" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+//       if(event.button === 2){
+//         code = 'RMB';
+//       }
+//       if(event.button === 0){
+//         code = 'LMB';
+//       }else{
+//         code = 'Other';
+//       }
+//   }
+//   return code;
+// }
 
 class Cell extends Component {
   constructor(props){
     super(props)
     this.show = this.show.bind(this)
     this.flag = this.flag.bind(this)
+    this.handleClickDown = this.handleClickDown.bind(this)
+    this.handleClickUp = this.handleClickUp.bind(this)
+    this.state = {
+      LMB: false,
+      RMB: false
+    }
+  }
+
+  handleClickUp(e){
+    e.preventDefault();
+    if( this.state.LMB && this.state.RMB ){
+      //do double click
+      console.log('do double click');
+    }else if( this.state.LMB ){
+      //do show cell
+      this.show(e);
+    }else if( this.state.RMB ){
+      //do flag toggle
+      this.flag(e);
+    }
+    this.setState({LMB: false, RMB: false});
+  }
+
+  handleClickDown(e){
+    e.preventDefault();
+    if(e.buttons === 3){
+      this.setState({LMB: true, RMB: true});
+    }else if(e.buttons === 1){
+      this.setState({LMB: true});
+    }else if(e.buttons === 2){
+      this.setState({RMB: true});
+    }
   }
 
   show(e){
-    e.preventDefault();
-    const check = e.nativeEvent;
-    console.log(check);
     e.preventDefault();
     if(this.props.data.status !== "hidden"){
       return;
@@ -29,9 +75,7 @@ class Cell extends Component {
   }
 
   flag(e){
-    e.preventDefault();
-    if(this.props.data.status === "hidden" && isRMB(e.nativeEvent)){
-      //turn on the flag
+    if(this.props.data.status !== "show"){
       this.props.flagCell(this.props.index);
     }
   }
@@ -48,12 +92,14 @@ class Cell extends Component {
     }
     if(this.props.data.status==="hidden" && this.props.gameStatus==='active'){
       return (
-        <div className={className} onClick={this.show} onContextMenu={this.flag}>
+        <div className={className}
+          onMouseDown={this.handleClickDown} onMouseUp={this.handleClickUp} onContextMenu={this.handleClickDown}>
         </div>
       );
     }else{
       return (
-        <div className={className} onContextMenu={this.flag}>
+        <div className={className}
+          onMouseDown={this.handleClickDown} onMouseUp={this.handleClickUp} onContextMenu={this.handleClickDown}>
           {this.props.data.isMine ? 'X' : cellText}
         </div>
       );
