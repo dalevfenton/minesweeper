@@ -83,11 +83,9 @@ class Cell extends Component {
 
   fastClear(e){
     e.preventDefault();
-    console.log('fastClear called');
     if(this.props.data.status !== "show"){
       return;
     }
-    console.log('fastClear calling doubleClickCell');
     this.props.doubleClickCell(this.props.index);
   }
 

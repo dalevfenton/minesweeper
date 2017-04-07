@@ -13,8 +13,6 @@ class App extends Component {
       width: null,
       height: null,
       numMines: null,
-      cells: null,
-      time: null,
     }
   }
 

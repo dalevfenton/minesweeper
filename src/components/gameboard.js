@@ -17,19 +17,27 @@ const cellRefs = [
 class GameBoard extends Component {
   constructor (props){
     super(props)
+    this.isWin = this.isWin.bind(this)
+    this.isLoss = this.isLoss.bind(this)
+    this.handleCellClick = this.handleCellClick.bind(this)
+    this.handleReset = this.handleReset.bind(this)
     this.showCell = this.showCell.bind(this)
     this.flagCell = this.flagCell.bind(this)
     this.doubleClickCell = this.doubleClickCell.bind(this)
     this.clearCell = this.clearCell.bind(this)
     this.clearCells = this.clearCells.bind(this)
-    this.isWin = this.isWin.bind(this)
-    this.isLoss = this.isLoss.bind(this)
     this.getCells = this.getCells.bind(this)
+    this.countMines = this.countMines.bind(this)
     this.startAtZero = this.startAtZero.bind(this)
+    this.setup = this.setup.bind(this)
+    this.updateTimer = this.updateTimer.bind(this)
     this.state = {
       cells : [],
       status: 'active',
       started: false,
+      timer: null,
+      interval: null,
+      debug: true
     }
   }
 
@@ -43,7 +51,8 @@ class GameBoard extends Component {
     }, []);
 
     if(numLeft.length===this.props.data.numMines ? true : false){
-      this.setState({status: 'win'});
+      clearInterval(this.state.interval);
+      this.setState({status: 'win', interval: null});
       return true;
     }else{
       return false;
@@ -54,7 +63,8 @@ class GameBoard extends Component {
     let cells = this.state.cells;
     if(cells[cellId].isMine){
       //set game to loss
-      this.setState({status: 'loss'});
+      clearInterval(this.state.interval);
+      this.setState({status: 'loss', interval: null});
       return true;
     }else{
       return false;
@@ -75,6 +85,20 @@ class GameBoard extends Component {
       default:
         console.log('handleCellClick did not get a valid clickType');
     }
+  }
+
+  handleReset( e ){
+    if(this.state.interval){
+      clearInterval(this.state.interval);
+    }
+    let cells = this.setup();
+    this.setState({
+      cells : cells,
+      status: 'active',
+      started: false,
+      timer: null,
+      interval: null
+    });
   }
 
   showCell ( cellId ){
@@ -248,10 +272,13 @@ class GameBoard extends Component {
       cells[cellId].status = "show";
       cells = this.clearCells( cellId, cells);
       //reset state and then clear the original cell that was clicked
-      this.setState({ cells: cells, started: true });
+      //set start time so we can diff when we need to
+      let timer = Date.now();
+      let interval = setInterval( this.updateTimer, 1000 );
+      this.setState({ cells: cells, started: true, timer: timer, interval: interval });
   }
 
-  componentWillMount(){
+  setup(){
     const length = this.props.data.width * this.props.data.height;
     let cells = [];
     for(let i = 0; i < length; i++){
@@ -260,28 +287,59 @@ class GameBoard extends Component {
     }
     cells = arrayShuffle(cells);
     cells = this.countMines(cells);
+    return cells;
+  }
+
+  updateTimer(e){
+    this.forceUpdate();
+  }
+
+  componentWillMount(){
+    let cells = this.setup();
     this.setState({ cells: cells });
   }
 
   render(){
-    let cells = this.state.cells.map(function(cell, index){
+    let cells = this.state.cells.map( (cell, index) => {
       return (<Cell data={cell} key={index} index={index}
         showCell={this.showCell} flagCell={this.flagCell}
         doubleClickCell={this.doubleClickCell} gameStatus={this.state.status}
         />);
-    }.bind(this));
+    });
+    console.log(this.state.cells);
+    let mineCount = this.state.cells.reduce( (accum, cell, index) => {
+      if(cell.isMine && cell.status !== 'flagged'){
+        accum++;
+      }
+      return accum;
+    }, 0);
+    let time = "000";
+    if(this.state.started){
+      time =  "000" + String(Math.floor((Date.now() - this.state.timer) / 1000));
+      time = time.slice(-3);
+    }
     let style = {
       width: (30*this.props.data.width) + 'px',
     };
+    let debugStyle = this.state.debug ? {display: "block"} : { display: "none" };
     let status = this.state.status==="active"?"Active":this.state.status.toUpperCase();
     return (
-      <div className="GameBoard" style={style}>
-        <div className="statusMessage">{status}</div>
-        <div>width - {this.props.data.width}</div>
-        <div>height - {this.props.data.height}</div>
-        <div>numMines - {this.props.data.numMines}</div>
-        {cells}
-        <button onClick={this.props.openMenu}>Open Menu</button>
+      <div>
+        <div className="GameBoard" style={style}>
+          <div className="BoardMeta">
+            <div className="MineCounter">{mineCount}</div>
+            <div className="RestartButton">Restart</div>
+            <div className="Timer">{time}</div>
+          </div>
+          {cells}
+          <button onClick={this.props.openMenu}>Open Menu</button>
+        </div>
+       <div className="debug" style={debugStyle}>
+         <div className="statusMessage">{status}</div>
+         <div>width - {this.props.data.width}</div>
+         <div>height - {this.props.data.height}</div>
+         <div>numMines - {this.props.data.numMines}</div>
+       </div>
       </div>
     );
   }

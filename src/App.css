@@ -41,6 +41,13 @@ ul {
   border: 1px solid white;
 }
 
+.debug {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 15px;
+  text-align: right;
+}
 .GameBoard {
   margin: 0 auto;
 }
@@ -63,4 +70,30 @@ ul {
 
 .FlaggedCell {
   background: #ff2222;
+}
+
+.MouseDownCell {
+
+}
+
+.BoardMeta {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+}
+
+.MineCounter, .RestartButton, .Timer {
+  height: 30px;
+  display: inline-flex;
+  text-align: center;
+}
+
+.MineCounter, .Timer {
+  flex-grow: 2;
+  background: #444;
+  color: #fff;
+}
+
+.RestartButton {
+  flex-grow: 1;
 }
