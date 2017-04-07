@@ -20,6 +20,7 @@ class GameBoard extends Component {
     this.showCell = this.showCell.bind(this)
     this.flagCell = this.flagCell.bind(this)
     this.doubleClickCell = this.doubleClickCell.bind(this)
+    this.clearCell = this.clearCell.bind(this)
     this.clearCells = this.clearCells.bind(this)
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
@@ -83,18 +84,10 @@ class GameBoard extends Component {
       this.startAtZero( cellId );
       return;
     }
-    //clear the cell
-    if(this.state.status==="active"){
-      let cells = this.state.cells;
-      cells[cellId].status = "show";
-      if( !( this.isLoss(cellId) || this.isWin(cells) ) ){
-        if(cells[cellId].mineCount === 0){
-          //clear all surrounding cells (recursively)
-          cells = this.clearCells( cellId, cells, []);
-        }
-        this.setState({cells: cells});
-      }
-    }
+
+    let cells = this.state.cells;
+    cells = this.clearCell( cells, cellId );
+    this.setState({cells: cells});
   }
 
   flagCell ( cellId ){
@@ -121,12 +114,30 @@ class GameBoard extends Component {
         accum.push(aroundCellId);
       }
       return accum;
-    }, []]);
+    }, []);
     if( flaggedCells.length === cells[cellId].mineCount){
-      flaggedCells.forEach( (cellId) => {
+      cellsAround.forEach( (aroundId) => {
         //set each to 'show' and check for loss
+        if(cells[aroundId].status === 'hidden'){
+          cells = this.clearCell( cells, aroundId);
+        }
       });
     }
+    this.setState({cells: cells});
+  }
+
+  clearCell( cellArray, cellId ){
+    //clear the cell
+    if(this.state.status==="active"){
+      cellArray[cellId].status = "show";
+      if( !( this.isLoss(cellId) || this.isWin(cellArray) ) ){
+        if(cellArray[cellId].mineCount === 0){
+          //clear all surrounding cells (recursively)
+          cellArray = this.clearCells( cellId, cellArray, []);
+        }
+      }
+    }
+    return cellArray;
   }
 
   clearCells ( cellId, cellArray, checked ){
@@ -256,7 +267,7 @@ class GameBoard extends Component {
     let cells = this.state.cells.map(function(cell, index){
       return (<Cell data={cell} key={index} index={index}
         showCell={this.showCell} flagCell={this.flagCell}
-        gameStatus={this.state.status}
+        doubleClickCell={this.doubleClickCell} gameStatus={this.state.status}
         />);
     }.bind(this));
     let style = {

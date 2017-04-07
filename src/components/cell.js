@@ -32,6 +32,7 @@ class Cell extends Component {
     super(props)
     this.show = this.show.bind(this)
     this.flag = this.flag.bind(this)
+    this.fastClear = this.fastClear.bind(this)
     this.handleClickDown = this.handleClickDown.bind(this)
     this.handleClickUp = this.handleClickUp.bind(this)
     this.state = {
@@ -44,7 +45,7 @@ class Cell extends Component {
     e.preventDefault();
     if( this.state.LMB && this.state.RMB ){
       //do double click
-      console.log('do double click');
+      this.fastClear(e);
     }else if( this.state.LMB ){
       //do show cell
       this.show(e);
@@ -78,6 +79,16 @@ class Cell extends Component {
     if(this.props.data.status !== "show"){
       this.props.flagCell(this.props.index);
     }
+  }
+
+  fastClear(e){
+    e.preventDefault();
+    console.log('fastClear called');
+    if(this.props.data.status !== "show"){
+      return;
+    }
+    console.log('fastClear calling doubleClickCell');
+    this.props.doubleClickCell(this.props.index);
   }
 
   render(){
