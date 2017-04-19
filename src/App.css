@@ -15,9 +15,17 @@ ul {
   list-style: none;
 }
 
+html, body {
+  width: 100%;
+  height: 100%;
+}
 .App {
-  width: 904px;
-  border: 2px solid black;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
 }
 
 .MenuContainer, .CustomSettingsModal {
@@ -48,52 +56,117 @@ ul {
   padding: 15px;
   text-align: right;
 }
-.GameBoard {
+.outerBorder {
+  border: 1px solid #000;
+  display: inline-block;
+  width: auto;
+  height: auto;
   margin: 0 auto;
 }
+.GameBoard {
+  border: 3px outset;
+  padding: 6px;
+  background-color: #c0c0c0;
+}
 
+.CellsWrapper {
+  border: 3px inset;
+}
 .GameBoardCell {
   display: inline-block;
   width: 30px;
   height: 30px;
-  border: 1px solid #222222;
+  border: 2px outset;
   vertical-align: top;
-  background: #777777;
+  background: #c0c0c0;
   text-align: center;
   line-height: 30px;
   cursor: pointer;
 }
 
 .ShowCell {
-  background: #dddddd;
+  background: #c0c0c0;
+  border: 1px solid #808080;
 }
 
 .FlaggedCell {
-  background: #ff2222;
+  background-image: url('assets/flag-small.gif');
 }
-
+.MisFlagged {
+  background-color: #ff0000;
+  background-image: url('assets/misflagged.gif');
+}
+.MineCell {
+  background-image: url('assets/mine.gif');
+}
+.LossCell {
+  background-color: #ff0000;
+  background-image: url('assets/mine.gif');
+}
 .MouseDownCell {
 
 }
-
+.OneCell {
+  color: #0000ff;
+}
+.TwoCell {
+  color: #008000;
+}
+.ThreeCell {
+  color: #ff0000;
+}
+.FourCell {
+  color: #000080;
+}
+.FiveCell {
+  color: #800000;
+}
+.SixCell {
+  color: #008080;
+}
+.SevenCell {
+  color: #840084;
+}
+.EightCell {
+  color: #000000;
+}
 .BoardMeta {
   display: flex;
   flex-direction: row;
-  text-align: center;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px inset;
+  padding: 4px 5px;
+  margin-bottom: 6px;
 }
 
 .MineCounter, .RestartButton, .Timer {
-  height: 30px;
+  height: 26px;
   display: inline-flex;
-  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .MineCounter, .Timer {
-  flex-grow: 2;
-  background: #444;
-  color: #fff;
+  width: 42px;
+  background: #000;
+  color: #ff0000;
+  border: 1px inset;
+  text-align: center;
 }
-
-.RestartButton {
-  flex-grow: 1;
+.CounterNumber{
+  background-image: url('assets/numbers.gif');
+  width: 11px;
+  height: 21px;
+  display: inline-block;
+  margin-right: 2px;
+}
+.CounterNumber:last-of-type{
+  margin-right: 0;
+}
+.FaceButton {
+  width: 26px;
+  height: 26px;
+  background-image: url('assets/faces.gif');
+  content: " ";
 }

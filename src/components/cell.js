@@ -1,31 +1,7 @@
 import React, { Component } from 'react';
 import '../App.css';
 
-// function getButton(e){
-//   let event = e || window.event;
-//   let code;
-//   console.log({button: e.button, which: e.which, buttons: e.buttons});
-//   if ("which" in event){  // IE, Opera
-//       if(event.which === 3){
-//         code = 'RMB';
-//       }
-//       if(event.which === 1){
-//         code = 'LMB';
-//       }else{
-//         code = 'Other';
-//       }
-//   }else if ("button" in event){  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-//       if(event.button === 2){
-//         code = 'RMB';
-//       }
-//       if(event.button === 0){
-//         code = 'LMB';
-//       }else{
-//         code = 'Other';
-//       }
-//   }
-//   return code;
-// }
+let numberWords = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
 
 class Cell extends Component {
   constructor(props){
@@ -62,6 +38,7 @@ class Cell extends Component {
       this.setState({LMB: true, RMB: true});
     }else if(e.buttons === 1){
       this.setState({LMB: true});
+      this.props.setGuess();
     }else if(e.buttons === 2){
       this.setState({RMB: true});
     }
@@ -93,13 +70,23 @@ class Cell extends Component {
     let className = "GameBoardCell";
     let cellText = this.props.data.mineCount === 0 ? "" : this.props.data.mineCount;
     if(this.props.data.status === "hidden"){
+      //hidden cells are always hidden
       className += " HiddenCell";
     }else if(this.props.data.status === "flagged"){
-      className += " FlaggedCell";
+      //if the game is still active we let flags display no matter what
+      if(this.props.gameStatus==="loss" && !this.props.data.isMine){
+        className += " MisFlagged";
+      }else{
+        className += " FlaggedCell";
+      }
+    }else if(this.props.gameStatus==="loss"){
+      if(this.props.data.status==="loss"){
+        className += "LossCell";
+      }
     }else{
-      className += " ShowCell";
+      className += " ShowCell " + numberWords[this.props.data.mineCount] + "Cell";
     }
-    if(this.props.data.status==="hidden" && this.props.gameStatus==='active'){
+    if(this.props.data.status==="hidden" && (this.props.gameStatus==='active' || this.props.gameStatus==='guess')){
       return (
         <div className={className}
           onMouseDown={this.handleClickDown} onMouseUp={this.handleClickUp} onContextMenu={this.handleClickDown}>
@@ -109,7 +96,7 @@ class Cell extends Component {
       return (
         <div className={className}
           onMouseDown={this.handleClickDown} onMouseUp={this.handleClickUp} onContextMenu={this.handleClickDown}>
-          {this.props.data.isMine ? 'X' : cellText}
+          {this.props.data.isMine ? ' ' : cellText}
         </div>
       );
     }

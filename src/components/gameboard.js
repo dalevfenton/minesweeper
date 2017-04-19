@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import '../App.css';
 import { arrayShuffle } from '../utility';
 import Cell from './cell';
+import Counter from './counter';
+import FaceButton from './facebutton';
 
 const cellRefs = [
   function(x, width){ return x-width-1},
@@ -20,6 +22,7 @@ class GameBoard extends Component {
     this.isWin = this.isWin.bind(this)
     this.isLoss = this.isLoss.bind(this)
     this.handleCellClick = this.handleCellClick.bind(this)
+    this.setGuess = this.setGuess.bind(this)
     this.handleReset = this.handleReset.bind(this)
     this.showCell = this.showCell.bind(this)
     this.flagCell = this.flagCell.bind(this)
@@ -63,8 +66,9 @@ class GameBoard extends Component {
     let cells = this.state.cells;
     if(cells[cellId].isMine){
       //set game to loss
+      cells[cellId].status = "loss";
       clearInterval(this.state.interval);
-      this.setState({status: 'loss', interval: null});
+      this.setState({status: 'loss', interval: null, cells: cells});
       return true;
     }else{
       return false;
@@ -72,6 +76,8 @@ class GameBoard extends Component {
   }
 
   handleCellClick( cellId, clickType ){
+    console.log('handleCellClick called');
+    this.setState({status: 'active'});
     switch (clickType) {
       case 'leftClick':
         this.showCell(cellId);
@@ -104,6 +110,7 @@ class GameBoard extends Component {
   showCell ( cellId ){
     //if this is the first cell clicked, we need to make sure we start
     //on a zero mine cell
+    this.setState({status: 'active'});
     if(!this.state.started){
       this.startAtZero( cellId );
       return;
@@ -116,7 +123,7 @@ class GameBoard extends Component {
 
   flagCell ( cellId ){
     //flag the cell
-    if(this.state.status==="active"){
+    if(this.state.status==="active" || this.state.status==="guess"){
       let cells = this.state.cells;
       if(cells[cellId].status === "hidden"){
         cells[cellId].status = "flagged";
@@ -131,6 +138,7 @@ class GameBoard extends Component {
     //clears all cells around the double clicked cell, if enough
     //surrounding cells have been flagged
     //can cause a win or loss
+    this.setState({status: 'active'});
     let cellsAround = this.getCells( cellId );
     let cells = this.state.cells;
     let flaggedCells = cellsAround.reduce( ( accum, aroundCellId, index ) => {
@@ -152,7 +160,7 @@ class GameBoard extends Component {
 
   clearCell( cellArray, cellId ){
     //clear the cell
-    if(this.state.status==="active"){
+    if(this.state.status==="active" || this.state.status==="guess"){
       cellArray[cellId].status = "show";
       if( !( this.isLoss(cellId) || this.isWin(cellArray) ) ){
         if(cellArray[cellId].mineCount === 0){
@@ -278,6 +286,10 @@ class GameBoard extends Component {
       this.setState({ cells: cells, started: true, timer: timer, interval: interval });
   }
 
+  setGuess(){
+    this.setState({status: 'guess'});
+  }
+
   setup(){
     const length = this.props.data.width * this.props.data.height;
     let cells = [];
@@ -287,7 +299,16 @@ class GameBoard extends Component {
     }
     cells = arrayShuffle(cells);
     cells = this.countMines(cells);
-    return cells;
+    if(this.state.interval){
+      clearInterval(this.state.interval);
+    }
+    this.setState({
+      cells : cells,
+      status: 'active',
+      started: false,
+      timer: null,
+      interval: null,
+    });
   }
 
   updateTimer(e){
@@ -295,8 +316,7 @@ class GameBoard extends Component {
   }
 
   componentWillMount(){
-    let cells = this.setup();
-    this.setState({ cells: cells });
+    this.setup();
   }
 
   render(){
@@ -304,38 +324,45 @@ class GameBoard extends Component {
       return (<Cell data={cell} key={index} index={index}
         showCell={this.showCell} flagCell={this.flagCell}
         doubleClickCell={this.doubleClickCell} gameStatus={this.state.status}
+        setGuess={this.setGuess}
         />);
     });
-    console.log(this.state.cells);
+
+    let padding = "000";
     let mineCount = this.state.cells.reduce( (accum, cell, index) => {
       if(cell.isMine && cell.status !== 'flagged'){
         accum++;
       }
       return accum;
     }, 0);
-    let time = "000";
+    mineCount = (padding+mineCount).slice(-3);
+
+    let time = padding;
     if(this.state.started){
-      time =  "000" + String(Math.floor((Date.now() - this.state.timer) / 1000));
+      time =  padding + String(Math.floor((Date.now() - this.state.timer) / 1000));
       time = time.slice(-3);
     }
+
     let style = {
-      width: (30*this.props.data.width) + 'px',
+      width: (30*this.props.data.width + 24) + 'px',
     };
     let debugStyle = this.state.debug ? {display: "block"} : { display: "none" };
-    let status = this.state.status==="active"?"Active":this.state.status.toUpperCase();
+
     return (
-      <div>
+      <div className="outerBorder">
         <div className="GameBoard" style={style}>
           <div className="BoardMeta">
-            <div className="MineCounter">{mineCount}</div>
-            <div className="RestartButton">Restart</div>
-            <div className="Timer">{time}</div>
+            <Counter className="MineCounter" count={mineCount} />
+            <FaceButton setup={this.setup} status={this.state.status} />
+            <Counter className="Timer" count={time} />
           </div>
-          {cells}
+          <div className="CellsWrapper">
+            {cells}
+          </div>
           <button onClick={this.props.openMenu}>Open Menu</button>
         </div>
        <div className="debug" style={debugStyle}>
-         <div className="statusMessage">{status}</div>
+         <div className="statusMessage">{this.state.status}</div>
          <div>width - {this.props.data.width}</div>
          <div>height - {this.props.data.height}</div>
          <div>numMines - {this.props.data.numMines}</div>

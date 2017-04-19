@@ -16,5 +16,7 @@
     "eject": "react-scripts eject"
   },
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "git@github.com:dalevfenton/minesweeper.git",
+  "author": "Dale Fenton <fentondale@gmail.com>"
 }
