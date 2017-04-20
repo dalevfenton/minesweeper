@@ -349,7 +349,6 @@ class GameBoard extends Component {
     let debugStyle = this.state.debug ? {display: "block"} : { display: "none" };
 
     return (
-      <div className="outerBorder">
         <div className="GameBoard" style={style}>
           <div className="BoardMeta">
             <Counter className="MineCounter" count={mineCount} />
@@ -360,14 +359,13 @@ class GameBoard extends Component {
             {cells}
           </div>
           <button onClick={this.props.openMenu}>Open Menu</button>
+          <div className="debug" style={debugStyle}>
+            <div className="statusMessage">{this.state.status}</div>
+            <div>width - {this.props.data.width}</div>
+            <div>height - {this.props.data.height}</div>
+            <div>numMines - {this.props.data.numMines}</div>
+          </div>
         </div>
-       <div className="debug" style={debugStyle}>
-         <div className="statusMessage">{this.state.status}</div>
-         <div>width - {this.props.data.width}</div>
-         <div>height - {this.props.data.height}</div>
-         <div>numMines - {this.props.data.numMines}</div>
-       </div>
-      </div>
     );
   }
 }

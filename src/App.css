@@ -27,7 +27,116 @@ html, body {
   right: 0;
   text-align: center;
 }
+.AppBar{
+  width: 100%;
+  height: 20px;
+  padding: 2px;
+  background-color: #000080;
+  border-bottom: 1px solid #000;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.AppBarItems {
+  display: inline-flex;
+}
+.AppBarName {
+  align-content: flex-start;
+  font-size: 11px;
+  margin-left: 21px;
+  vertical-align: top;
+  height: 19px;
+  position: relative;
+}
+.AppBarName::before{
+  background-image: url('assets/title-icon.gif');
+  content: " ";
+  width: 15px;
+  height: 15px;
+  display: block;
+  top: 3px;
+  left: -18px;
+  position: absolute;
+}
+.AppBarTitleText{
+  line-height: 19px;
+}
+.AppBarButtons{
+  align-content: flex-end;
+  height: 19px;
+  padding: 2px;
+  font-size: 9px;
+  font-weight: bold;
+}
+.AppBarButton{
+  width: 15px;
+  height: 13px;
+  border: 1px outset;
+  background-color: #c0c0c0;
+  color: #000;
+  text-align: center;
+  box-shadow: 1px 1px #000;
+  margin-right: 4px;
+  display: inline-block;
+  line-height: 11px;
+  position: relative;
+}
+.AppBarButton::before{
+  position: absolute;
+  width: 13px;
+  height: 11px;
+  display: block;
+  top: 0px;
+  left: 0px;
+  content: " ";
+}
+.MinimizeButton::before{
+  background-image: url('assets/minimize.gif');
+}
+.MaximizeButton::before{
+  background-image: url('assets/maximize.gif');
+}
+.CloseButton::before{
+  background-image: url('assets/close-button.gif');
+}
+.MenuBar {
+  width: 100%;
+  height: 20px;
+  border-bottom: 1px solid #000;
+  background-color: #c0c0c0;
+  text-align: left;
+  font-size: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+.MenuWrapper{
+  display: inline-block;
+  height: 20px;
+  line-height: 20px;
+  vertical-align: top;
+  color: black;
+  padding: 0 6px;
+  cursor: pointer;
+  position: relative;
+}
+.MenuTitle {
 
+}
+.MenuTitle::first-letter{
+  text-decoration: underline;
+  text-transform: uppercase;
+}
+.MenuBody{
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: 100%;
+  left: 0;
+  background: red;
+}
 .MenuContainer, .CustomSettingsModal {
   text-align: center;
   width: 300px;
@@ -61,7 +170,7 @@ html, body {
   display: inline-block;
   width: auto;
   height: auto;
-  margin: 0 auto;
+  margin: 30px auto 0 auto;
 }
 .GameBoard {
   border: 3px outset;
@@ -81,7 +190,6 @@ html, body {
   background: #c0c0c0;
   text-align: center;
   line-height: 30px;
-  cursor: pointer;
 }
 
 .ShowCell {
@@ -93,15 +201,17 @@ html, body {
   background-image: url('assets/flag-small.gif');
 }
 .MisFlagged {
-  background-color: #ff0000;
   background-image: url('assets/misflagged.gif');
+  border: 1px solid #808080;
 }
 .MineCell {
   background-image: url('assets/mine.gif');
+  border: 1px solid #808080;
 }
 .LossCell {
   background-color: #ff0000;
   background-image: url('assets/mine.gif');
+  border: 1px solid #808080;
 }
 .MouseDownCell {
 
