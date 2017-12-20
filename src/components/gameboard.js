@@ -1,208 +1,243 @@
-import React, { Component } from 'react';
-import '../App.css';
-import { arrayShuffle } from '../utility';
-import Cell from './cell';
-import Counter from './counter';
-import FaceButton from './facebutton';
+import React, { Component } from "react";
+import "../App.css";
+import { arrayShuffle } from "../utility";
+import Cell from "./cell";
+import Counter from "./counter";
+import FaceButton from "./facebutton";
 
 const cellRefs = [
-  function(x, width){ return x-width-1},
-  function(x, width){ return x-width},
-  function(x, width){ return x-width+1},
-  function(x, width){ return x-1},
-  function(x, width){ return x+1},
-  function(x, width){ return x+width-1},
-  function(x, width){ return x+width},
-  function(x, width){ return x+width+1},
+  function(x, width) {
+    return x - width - 1;
+  },
+  function(x, width) {
+    return x - width;
+  },
+  function(x, width) {
+    return x - width + 1;
+  },
+  function(x, width) {
+    return x - 1;
+  },
+  function(x, width) {
+    return x + 1;
+  },
+  function(x, width) {
+    return x + width - 1;
+  },
+  function(x, width) {
+    return x + width;
+  },
+  function(x, width) {
+    return x + width + 1;
+  }
 ];
 
 class GameBoard extends Component {
-  constructor (props){
-    super(props)
-    this.isWin = this.isWin.bind(this)
-    this.isLoss = this.isLoss.bind(this)
-    this.handleCellClick = this.handleCellClick.bind(this)
-    this.setGuess = this.setGuess.bind(this)
-    this.handleReset = this.handleReset.bind(this)
-    this.showCell = this.showCell.bind(this)
-    this.flagCell = this.flagCell.bind(this)
-    this.doubleClickCell = this.doubleClickCell.bind(this)
-    this.clearCell = this.clearCell.bind(this)
-    this.clearCells = this.clearCells.bind(this)
-    this.getCells = this.getCells.bind(this)
-    this.countMines = this.countMines.bind(this)
-    this.startAtZero = this.startAtZero.bind(this)
-    this.setup = this.setup.bind(this)
-    this.updateTimer = this.updateTimer.bind(this)
+  constructor(props) {
+    super(props);
+    this.isWin = this.isWin.bind(this);
+    this.isLoss = this.isLoss.bind(this);
+    this.endGame = this.endGame.bind(this);
+    this.handleCellClick = this.handleCellClick.bind(this);
+    this.setGuess = this.setGuess.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+    this.showCell = this.showCell.bind(this);
+    this.flagCell = this.flagCell.bind(this);
+    this.doubleClickCell = this.doubleClickCell.bind(this);
+    this.clearCell = this.clearCell.bind(this);
+    this.clearCells = this.clearCells.bind(this);
+    this.getCells = this.getCells.bind(this);
+    this.countMines = this.countMines.bind(this);
+    this.startAtZero = this.startAtZero.bind(this);
+    this.setup = this.setup.bind(this);
+    this.updateTimer = this.updateTimer.bind(this);
     this.state = {
-      cells : [],
-      status: 'active',
+      cells: [],
+      status: "active",
       started: false,
+      ended: false,
       timer: null,
       interval: null,
       debug: true
-    }
+    };
   }
 
-  isWin (cellArray) {
-    let numLeft = cellArray.reduce(function(accum, cell, index){
-      if(cell.status !== "show"){
+  isWin(cellArray) {
+    let numLeft = cellArray.reduce(function(accum, cell, index) {
+      if (cell.status !== "show") {
         return [...accum, index];
-      }else{
+      } else {
         return accum;
       }
     }, []);
 
-    if(numLeft.length===this.props.data.numMines ? true : false){
-      clearInterval(this.state.interval);
-      this.setState({status: 'win', interval: null});
+    if (numLeft.length === this.props.data.numMines ? true : false) {
+      this.endGame("win", null);
       return true;
-    }else{
+    } else {
       return false;
     }
   }
 
-  isLoss ( cellId ){
+  isLoss(cellId) {
     let cells = this.state.cells;
-    if(cells[cellId].isMine){
+    if (cells[cellId].isMine) {
       //set game to loss
       cells[cellId].status = "loss";
-      clearInterval(this.state.interval);
-      this.setState({status: 'loss', interval: null, cells: cells});
+      this.endGame("loss", cells);
       return true;
-    }else{
+    } else {
       return false;
     }
   }
 
-  handleCellClick( cellId, clickType ){
-    console.log('handleCellClick called');
-    this.setState({status: 'active'});
+  endGame(status, cells) {
+    clearInterval(this.state.interval);
+    cells = cells ? cells : this.cells;
+    this.setState({
+      status: status,
+      interval: null,
+      cells: cells,
+      ended: Date.now()
+    });
+  }
+
+  handleCellClick(cellId, clickType) {
+    if (this.status === "win" || this.status === "loss") {
+      return;
+    }
+    console.log("handleCellClick called");
+    this.setState({ status: "active" });
     switch (clickType) {
-      case 'leftClick':
+      case "leftClick":
         this.showCell(cellId);
         break;
-      case 'rightClick':
+      case "rightClick":
         this.flagCell(cellId);
         break;
-      case 'doubleClick':
+      case "doubleClick":
         this.doubleClickCell(cellId);
         break;
       default:
-        console.log('handleCellClick did not get a valid clickType');
+        console.log("handleCellClick did not get a valid clickType");
     }
   }
 
-  handleReset( e ){
-    if(this.state.interval){
+  handleReset(e) {
+    if (this.state.interval) {
       clearInterval(this.state.interval);
     }
     let cells = this.setup();
     this.setState({
-      cells : cells,
-      status: 'active',
+      cells: cells,
+      status: "active",
       started: false,
       timer: null,
       interval: null
     });
   }
 
-  showCell ( cellId ){
+  showCell(cellId) {
     //if this is the first cell clicked, we need to make sure we start
     //on a zero mine cell
-    this.setState({status: 'active'});
-    if(!this.state.started){
-      this.startAtZero( cellId );
+    this.setState({ status: "active" });
+    if (!this.state.started) {
+      this.startAtZero(cellId);
       return;
     }
 
     let cells = this.state.cells;
-    cells = this.clearCell( cells, cellId );
-    this.setState({cells: cells});
+    cells = this.clearCell(cells, cellId);
+    this.setState({ cells: cells });
   }
 
-  flagCell ( cellId ){
+  flagCell(cellId) {
     //flag the cell
-    if(this.state.status==="active" || this.state.status==="guess"){
+    if (this.state.status === "active" || this.state.status === "guess") {
       let cells = this.state.cells;
-      if(cells[cellId].status === "hidden"){
+      if (cells[cellId].status === "hidden") {
         cells[cellId].status = "flagged";
-      }else{
+      } else {
         cells[cellId].status = "hidden";
       }
-      this.setState({cells: cells});
+      this.setState({ cells: cells });
     }
   }
 
-  doubleClickCell ( cellId ){
+  doubleClickCell(cellId) {
     //clears all cells around the double clicked cell, if enough
     //surrounding cells have been flagged
     //can cause a win or loss
-    this.setState({status: 'active'});
-    let cellsAround = this.getCells( cellId );
+    this.setState({ status: "active" });
+    let cellsAround = this.getCells(cellId);
     let cells = this.state.cells;
-    let flaggedCells = cellsAround.reduce( ( accum, aroundCellId, index ) => {
-      if( cells[aroundCellId].status === "flagged"){
+    let flaggedCells = cellsAround.reduce((accum, aroundCellId, index) => {
+      if (cells[aroundCellId].status === "flagged") {
         accum.push(aroundCellId);
       }
       return accum;
     }, []);
-    if( flaggedCells.length === cells[cellId].mineCount){
-      cellsAround.forEach( (aroundId) => {
+    if (flaggedCells.length === cells[cellId].mineCount) {
+      cellsAround.forEach(aroundId => {
         //set each to 'show' and check for loss
-        if(cells[aroundId].status === 'hidden'){
-          cells = this.clearCell( cells, aroundId);
+        if (cells[aroundId].status === "hidden") {
+          cells = this.clearCell(cells, aroundId);
         }
       });
     }
-    this.setState({cells: cells});
+    this.setState({ cells: cells });
   }
 
-  clearCell( cellArray, cellId ){
+  clearCell(cellArray, cellId) {
     //clear the cell
-    if(this.state.status==="active" || this.state.status==="guess"){
+    if (this.state.status === "active" || this.state.status === "guess") {
       cellArray[cellId].status = "show";
-      if( !( this.isLoss(cellId) || this.isWin(cellArray) ) ){
-        if(cellArray[cellId].mineCount === 0){
+      if (!(this.isLoss(cellId) || this.isWin(cellArray))) {
+        if (cellArray[cellId].mineCount === 0) {
           //clear all surrounding cells (recursively)
-          cellArray = this.clearCells( cellId, cellArray, []);
+          cellArray = this.clearCells(cellId, cellArray, []);
         }
       }
     }
     return cellArray;
   }
 
-  clearCells ( cellId, cellArray, checked ){
+  clearCells(cellId, cellArray, checked) {
     let accum = checked || [];
     let clearCells = this.getCells(cellId);
-    clearCells.forEach(function(subCellId) {
-      cellArray[subCellId].status = "show";
-      if( cellArray[subCellId].mineCount === 0 && accum.indexOf(subCellId) === -1 ){
-        accum.push(subCellId);
-        cellArray = this.clearCells(subCellId, cellArray, accum);
-      }
-    }.bind(this));
+    clearCells.forEach(
+      function(subCellId) {
+        cellArray[subCellId].status = "show";
+        if (
+          cellArray[subCellId].mineCount === 0 &&
+          accum.indexOf(subCellId) === -1
+        ) {
+          accum.push(subCellId);
+          cellArray = this.clearCells(subCellId, cellArray, accum);
+        }
+      }.bind(this)
+    );
     return cellArray;
   }
 
   //returns an array of indices representing the cells surrounding
   //the cell at cellId
-  getCells ( cellId ){
+  getCells(cellId) {
     let cellsAround = [];
     const width = this.props.data.width;
     const height = this.props.data.height;
 
-    cellRefs.forEach(function(func, funcIndex){
+    cellRefs.forEach(function(func, funcIndex) {
       //check if we are a cell on the left or right edge of the board
-      const leftCol = cellId%width === 0 ? true : false;
-      const rightCol = (cellId+1)%width === 0 ? true : false;
+      const leftCol = cellId % width === 0 ? true : false;
+      const rightCol = (cellId + 1) % width === 0 ? true : false;
       //check if the current function we're on should be excluded if we're
       //on that edge (i.e. a cell on the left of the left edge should be)
-      const leftExclude = [0,3,5].indexOf(funcIndex) > -1 ? true : false;
-      const rightExclude = [2,4,7].indexOf(funcIndex) > -1 ? true : false;
+      const leftExclude = [0, 3, 5].indexOf(funcIndex) > -1 ? true : false;
+      const rightExclude = [2, 4, 7].indexOf(funcIndex) > -1 ? true : false;
       //if we're on the edge of the board, don't look for mines
       //don't check this cell if it should be excluded
-      if( (leftCol && leftExclude) || (rightCol && rightExclude) ){
+      if ((leftCol && leftExclude) || (rightCol && rightExclude)) {
         return;
       }
       //get the index of the the cell around the one we're checking
@@ -210,14 +245,14 @@ class GameBoard extends Component {
       //check that the index is a valid cell
       //invalid cells occur when the cell we're checking is
       //along the edge of the game board
-      if( value >= 0 && value <= (width*height)-1){
+      if (value >= 0 && value <= width * height - 1) {
         cellsAround.push(value);
       }
     });
     return cellsAround;
   }
 
-  countMines ( cellArray ){
+  countMines(cellArray) {
     // _______
     // |1|2|3|   count the number of mines around a given cell
     // |4|X|5|   we are using a flat array to store our cells but knowing the
@@ -232,140 +267,164 @@ class GameBoard extends Component {
     // cell 7 = index + width
     // cell 8 = index + width + 1
 
-    cellArray.forEach(function(cell, index, array){
-      let mineCount = 0;
-      //returns the valid cells around this one in the matrix
-      //( filters out non-proximate cells on edges & corners )
-      let cellsAround = this.getCells(index);
-      cellsAround.forEach(function(cellId){
-        if(array[cellId].isMine){
-          mineCount += 1;
-        }
-      });
-      cell.mineCount = mineCount;
-    }.bind(this));
+    cellArray.forEach(
+      function(cell, index, array) {
+        let mineCount = 0;
+        //returns the valid cells around this one in the matrix
+        //( filters out non-proximate cells on edges & corners )
+        let cellsAround = this.getCells(index);
+        cellsAround.forEach(function(cellId) {
+          if (array[cellId].isMine) {
+            mineCount += 1;
+          }
+        });
+        cell.mineCount = mineCount;
+      }.bind(this)
+    );
     return cellArray;
   }
 
-  startAtZero( cellId ){
-      //get current cells
-      let cells = this.state.cells;
-      //get cells to clear out
-      let cellsAround = this.getCells(cellId);
-      cellsAround.push(cellId);
-      //get list of current zero cells making sure
-      //to exclude cells in the group we are clearing
-      let emptyCells = cells.reduce( (accum, cell, index)=>{
-        if(cell.isMine === false && cellsAround.indexOf(index) === -1){
-          return [...accum, cell];
-        }else{
-          return accum;
-        }
-      }, []);
-      //for each cell in the group to clear we swap its
-      //isMine property with one from an empty cell
-      cellsAround.forEach( (id) => {
-        if(cells[id].isMine){
-          //pick a random cell in the array of empty cells
-          let replaceId = Math.floor( Math.random() * emptyCells.length-1 );
-          //remove it from the array so we don't pick it twice
-          let replaceCell = emptyCells.splice(replaceId, 1)[0];
-          //swap the values
-          cells[id].isMine = false;
-          cells[replaceCell.id].isMine = true;
-        }
-      });
-      //reset the counted values of mines based on the new array
-      cells = this.countMines(cells);
-      cells[cellId].status = "show";
-      cells = this.clearCells( cellId, cells);
-      //reset state and then clear the original cell that was clicked
-      //set start time so we can diff when we need to
-      let timer = Date.now();
-      let interval = setInterval( this.updateTimer, 1000 );
-      this.setState({ cells: cells, started: true, timer: timer, interval: interval });
+  startAtZero(cellId) {
+    //get current cells
+    let cells = this.state.cells;
+    //get cells to clear out
+    let cellsAround = this.getCells(cellId);
+    cellsAround.push(cellId);
+    //get list of current zero cells making sure
+    //to exclude cells in the group we are clearing
+    let emptyCells = cells.reduce((accum, cell, index) => {
+      if (cell.isMine === false && cellsAround.indexOf(index) === -1) {
+        return [...accum, cell];
+      } else {
+        return accum;
+      }
+    }, []);
+    //for each cell in the group to clear we swap its
+    //isMine property with one from an empty cell
+    cellsAround.forEach(id => {
+      if (cells[id].isMine) {
+        //pick a random cell in the array of empty cells
+        let replaceId = Math.floor(Math.random() * emptyCells.length - 1);
+        //remove it from the array so we don't pick it twice
+        let replaceCell = emptyCells.splice(replaceId, 1)[0];
+        //swap the values
+        cells[id].isMine = false;
+        cells[replaceCell.id].isMine = true;
+      }
+    });
+    //reset the counted values of mines based on the new array
+    cells = this.countMines(cells);
+    cells[cellId].status = "show";
+    cells = this.clearCells(cellId, cells);
+    //reset state and then clear the original cell that was clicked
+    //set start time so we can diff when we need to
+    let timer = Date.now();
+    this.setState({
+      cells: cells,
+      started: true,
+      timer: timer,
+      interval: setInterval(this.updateTimer, 1000)
+    });
   }
 
-  setGuess(){
-    this.setState({status: 'guess'});
+  setGuess() {
+    console.log("set guess called, pre check");
+    if (this.status === "win" || this.status === "loss") {
+      return;
+    }
+    console.log("set guess called, passed check");
+    this.setState({ status: "guess" });
   }
 
-  setup(){
+  setup() {
     const length = this.props.data.width * this.props.data.height;
     let cells = [];
-    for(let i = 0; i < length; i++){
-      let isMine = i<this.props.data.numMines ? true : false;
-      cells.push({isMine: isMine, status: 'hidden', id: i});
+    for (let i = 0; i < length; i++) {
+      let isMine = i < this.props.data.numMines ? true : false;
+      cells.push({ isMine: isMine, status: "hidden", id: i });
     }
     cells = arrayShuffle(cells);
     cells = this.countMines(cells);
-    if(this.state.interval){
+    if (this.state.interval) {
       clearInterval(this.state.interval);
     }
     this.setState({
-      cells : cells,
-      status: 'active',
+      cells: cells,
+      status: "active",
       started: false,
       timer: null,
-      interval: null,
+      interval: null
     });
   }
 
-  updateTimer(e){
+  updateTimer(e) {
     this.forceUpdate();
   }
 
-  componentWillMount(){
+  componentWillMount() {
     this.setup();
   }
 
-  render(){
-    let cells = this.state.cells.map( (cell, index) => {
-      return (<Cell data={cell} key={index} index={index}
-        showCell={this.showCell} flagCell={this.flagCell}
-        doubleClickCell={this.doubleClickCell} gameStatus={this.state.status}
-        setGuess={this.setGuess}
-        />);
+  render() {
+    let cells = this.state.cells.map((cell, index) => {
+      return (
+        <Cell
+          data={cell}
+          key={index}
+          index={index}
+          showCell={this.showCell}
+          flagCell={this.flagCell}
+          doubleClickCell={this.doubleClickCell}
+          gameStatus={this.state.status}
+          setGuess={this.setGuess}
+        />
+      );
     });
 
     let padding = "000";
-    let mineCount = this.state.cells.reduce( (accum, cell, index) => {
-      if(cell.isMine && cell.status !== 'flagged'){
+    let mineCount = this.state.cells.reduce((accum, cell, index) => {
+      if (cell.isMine && cell.status !== "flagged") {
         accum++;
       }
       return accum;
     }, 0);
-    mineCount = (padding+mineCount).slice(-3);
+    mineCount = (padding + mineCount).slice(-3);
 
     let time = padding;
-    if(this.state.started){
-      time =  padding + String(Math.floor((Date.now() - this.state.timer) / 1000));
+    if (this.state.started && this.state.ended) {
+      time =
+        padding +
+        String(Math.floor((this.state.ended - this.state.timer) / 1000));
+      time = time.slice(-3);
+    } else if (this.state.started) {
+      time =
+        padding + String(Math.floor((Date.now() - this.state.timer) / 1000));
       time = time.slice(-3);
     }
 
     let style = {
-      width: (30*this.props.data.width + 24) + 'px',
+      width: 30 * this.props.data.width + 24 + "px"
     };
-    let debugStyle = this.state.debug ? {display: "block"} : { display: "none" };
+    let debugStyle = this.state.debug
+      ? { display: "block" }
+      : { display: "none" };
 
     return (
-        <div className="GameBoard" style={style}>
-          <div className="BoardMeta">
-            <Counter className="MineCounter" count={mineCount} />
-            <FaceButton setup={this.setup} status={this.state.status} />
-            <Counter className="Timer" count={time} />
-          </div>
-          <div className="CellsWrapper">
-            {cells}
-          </div>
-          <button onClick={this.props.openMenu}>Open Menu</button>
-          <div className="debug" style={debugStyle}>
-            <div className="statusMessage">{this.state.status}</div>
-            <div>width - {this.props.data.width}</div>
-            <div>height - {this.props.data.height}</div>
-            <div>numMines - {this.props.data.numMines}</div>
-          </div>
+      <div className="GameBoard" style={style}>
+        <div className="BoardMeta">
+          <Counter className="MineCounter" count={mineCount} />
+          <FaceButton setup={this.setup} status={this.state.status} />
+          <Counter className="Timer" count={time} />
         </div>
+        <div className="CellsWrapper">{cells}</div>
+        <button onClick={this.props.openMenu}>Open Menu</button>
+        <div className="debug" style={debugStyle}>
+          <div className="statusMessage">{this.state.status}</div>
+          <div>width - {this.props.data.width}</div>
+          <div>height - {this.props.data.height}</div>
+          <div>numMines - {this.props.data.numMines}</div>
+        </div>
+      </div>
     );
   }
 }

@@ -15,7 +15,8 @@ ul {
   list-style: none;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
@@ -27,7 +28,7 @@ html, body {
   right: 0;
   text-align: center;
 }
-.AppBar{
+.AppBar {
   width: 100%;
   height: 20px;
   padding: 2px;
@@ -50,8 +51,8 @@ html, body {
   height: 19px;
   position: relative;
 }
-.AppBarName::before{
-  background-image: url('assets/title-icon.gif');
+.AppBarName::before {
+  background-image: url("assets/title-icon.gif");
   content: " ";
   width: 15px;
   height: 15px;
@@ -60,17 +61,17 @@ html, body {
   left: -18px;
   position: absolute;
 }
-.AppBarTitleText{
+.AppBarTitleText {
   line-height: 19px;
 }
-.AppBarButtons{
+.AppBarButtons {
   align-content: flex-end;
   height: 19px;
   padding: 2px;
   font-size: 9px;
   font-weight: bold;
 }
-.AppBarButton{
+.AppBarButton {
   width: 15px;
   height: 13px;
   border: 1px outset;
@@ -83,7 +84,7 @@ html, body {
   line-height: 11px;
   position: relative;
 }
-.AppBarButton::before{
+.AppBarButton::before {
   position: absolute;
   width: 13px;
   height: 11px;
@@ -92,14 +93,14 @@ html, body {
   left: 0px;
   content: " ";
 }
-.MinimizeButton::before{
-  background-image: url('assets/minimize.gif');
+.MinimizeButton::before {
+  background-image: url("assets/minimize.gif");
 }
-.MaximizeButton::before{
-  background-image: url('assets/maximize.gif');
+.MaximizeButton::before {
+  background-image: url("assets/maximize.gif");
 }
-.CloseButton::before{
-  background-image: url('assets/close-button.gif');
+.CloseButton::before {
+  background-image: url("assets/close-button.gif");
 }
 .MenuBar {
   width: 100%;
@@ -112,7 +113,7 @@ html, body {
   flex-direction: row;
   justify-content: left;
 }
-.MenuWrapper{
+.MenuWrapper {
   display: inline-block;
   height: 20px;
   line-height: 20px;
@@ -123,13 +124,12 @@ html, body {
   position: relative;
 }
 .MenuTitle {
-
 }
-.MenuTitle::first-letter{
+.MenuTitle::first-letter {
   text-decoration: underline;
   text-transform: uppercase;
 }
-.MenuBody{
+.MenuBody {
   position: absolute;
   width: 200px;
   height: 200px;
@@ -137,7 +137,8 @@ html, body {
   left: 0;
   background: red;
 }
-.MenuContainer, .CustomSettingsModal {
+.MenuContainer,
+.CustomSettingsModal {
   text-align: center;
   width: 300px;
   background: black;
@@ -146,7 +147,8 @@ html, body {
   color: white;
 }
 
-.MenuContainer li, .CustomSettingsModal input {
+.MenuContainer li,
+.CustomSettingsModal input {
   cursor: pointer;
   display: block;
   width: 80%;
@@ -198,23 +200,22 @@ html, body {
 }
 
 .FlaggedCell {
-  background-image: url('assets/flag-small.gif');
+  background-image: url("assets/flag-small.gif");
 }
 .MisFlagged {
-  background-image: url('assets/misflagged.gif');
+  background-image: url("assets/misflagged.gif");
   border: 1px solid #808080;
 }
 .MineCell {
-  background-image: url('assets/mine.gif');
+  background-image: url("assets/mine.gif");
   border: 1px solid #808080;
 }
 .LossCell {
   background-color: #ff0000;
-  background-image: url('assets/mine.gif');
+  background-image: url("assets/mine.gif");
   border: 1px solid #808080;
 }
 .MouseDownCell {
-
 }
 .OneCell {
   color: #0000ff;
@@ -250,33 +251,36 @@ html, body {
   margin-bottom: 6px;
 }
 
-.MineCounter, .RestartButton, .Timer {
+.MineCounter,
+.RestartButton,
+.Timer {
   height: 26px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
 }
 
-.MineCounter, .Timer {
+.MineCounter,
+.Timer {
   width: 42px;
   background: #000;
   color: #ff0000;
   border: 1px inset;
   text-align: center;
 }
-.CounterNumber{
-  background-image: url('assets/numbers.gif');
+.CounterNumber {
+  background-image: url("assets/numbers.gif");
   width: 11px;
   height: 21px;
   display: inline-block;
   margin-right: 2px;
 }
-.CounterNumber:last-of-type{
+.CounterNumber:last-of-type {
   margin-right: 0;
 }
 .FaceButton {
   width: 26px;
   height: 26px;
-  background-image: url('assets/faces.gif');
+  background-image: url("assets/faces.gif");
   content: " ";
 }
