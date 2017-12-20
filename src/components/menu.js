@@ -1,11 +1,25 @@
 import React, { Component } from "react";
 import "../App.css";
 
-const menuItems = [
-  { title: "Beginner", height: 8, width: 8, numMines: 10 },
-  { title: "Intermediate", height: 16, width: 16, numMines: 40 },
-  { title: "Expert", height: 16, width: 30, numMines: 99 }
-];
+class MenuItem extends Component {
+  constructor(props) {
+    super(props);
+    this.handleInput = this.handleInput.bind(this);
+    this.state = {};
+  }
+
+  handleInput(e) {
+    this.props.doAction(this.props.item.action);
+  }
+
+  render() {
+    return (
+      <div className="MenuItem" onClick={this.handleInput}>
+        {this.props.item.label}
+      </div>
+    );
+  }
+}
 
 class Menu extends Component {
   constructor(props) {
@@ -16,10 +30,16 @@ class Menu extends Component {
   toggle(e) {
     this.props.toggle(this.props.title);
   }
+
   render() {
     let body = "";
     if (this.props.active === this.props.title) {
-      body = <div className="MenuBody">Menu Body Goes Here</div>;
+      let menuItems = this.props.items.map((item, index) => {
+        return (
+          <MenuItem item={item} key={index} doAction={this.props.action} />
+        );
+      });
+      body = <div className="MenuBody">{menuItems}</div>;
     }
     return (
       <div className="MenuWrapper">
