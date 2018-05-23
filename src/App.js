@@ -2,39 +2,9 @@ import React, { Component } from "react";
 import Menu from "./components/menu";
 import GameBoard from "./components/gameboard";
 import "./App.css";
+import gameModes from "./config/game-modes";
+import menus from "./config/menus";
 
-const gameMenu = [
-  { label: "New", hotkey: "F2", action: "new-game", keybind: "N" },
-  { label: "Beginner", action: "set-beginner", divider: true, keybind: "B" },
-  { label: "Intermediate", action: "set-intermediate", keybind: "I" },
-  { label: "Expert", action: "set-expert", keybind: "E" },
-  { label: "Sound", action: "toggle-sound", divider: true, keybind: "S" },
-  { label: "Marks", action: "toggle-marks", keybind: "M" },
-  {
-    label: "Preferences",
-    hotkey: "F3",
-    action: "open-preferences",
-    divider: true,
-    keybind: "P"
-  },
-  { label: "Exit", action: "close", divider: true, keybind: "E" }
-];
-const helpMenu = [
-  { label: "Index", hotkey: "F1", action: "", keybind: "I" },
-  { label: "Keyboard", action: "", keybind: "K" },
-  { label: "Using Help", action: "", keybind: "H" },
-  { label: "About", action: "open-about", divider: true, keybind: "A" }
-];
-const gameModes = {
-  "set-beginner": { title: "Beginner", height: 8, width: 8, numMines: 10 },
-  "set-intermediate": {
-    title: "Intermediate",
-    height: 16,
-    width: 16,
-    numMines: 40
-  },
-  "set-expert": { title: "Expert", height: 16, width: 30, numMines: 99 }
-};
 class App extends Component {
   constructor(props) {
     super(props);
@@ -47,7 +17,9 @@ class App extends Component {
       height: 10,
       numMines: 8,
       current: "Beginner",
-      game: Date.now()
+      game: Date.now(),
+      gameModes,
+      menus,
     };
   }
 
@@ -61,33 +33,18 @@ class App extends Component {
 
   menuInput(action) {
     console.log(action);
-    let config = {
-      width: 10,
-      height: 10,
-      numMines: 8,
-      title: "Beginner"
-    };
-    let game = this.game;
     switch (action) {
       case "set-beginner":
       case "set-intermediate":
       case "set-expert":
-        config = gameModes[action];
-        game = Date.now();
-        this.setState({
-          width: config.width,
-          height: config.height,
-          numMines: config.numMines,
-          current: config.title,
-          game: game
-        });
+        this.setGame(action);
         break;
       case "toggle-sound":
         break;
       case "toggle-marks":
         break;
       case "new-game":
-        game = Date.now();
+        this.setState({ game: Date.now() });
         break;
       case "open-preferences":
         break;
@@ -99,6 +56,19 @@ class App extends Component {
       default:
         console.log("nothing setup for this");
     }
+    this.setState({ activeMenu: false });
+  }
+
+  setGame(action) {
+    const config = gameModes[action];
+    const game = Date.now();
+    this.setState({
+      width: config.width,
+      height: config.height,
+      numMines: config.numMines,
+      current: config.title,
+      game: game
+    });
   }
 
   setBoard(config) {
@@ -134,14 +104,14 @@ class App extends Component {
           <div className="MenuBar">
             <Menu
               title="game"
-              items={gameMenu}
+              items={menus.gameMenu}
               toggle={this.toggleMenu}
               active={this.state.activeMenu}
               action={this.menuInput}
             />
             <Menu
               title="help"
-              items={helpMenu}
+              items={menus.helpMenu}
               toggle={this.toggleMenu}
               active={this.state.activeMenu}
               action={this.menuInput}

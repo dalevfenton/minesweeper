@@ -30,10 +30,15 @@ class Menu extends Component {
   toggle(e) {
     this.props.toggle(this.props.title);
   }
+  isActive() {
+    return this.props.active === this.props.title;
+  }
 
   render() {
     let body = "";
-    if (this.props.active === this.props.title) {
+    let wrapperClass = "MenuWrapper";
+    if (this.isActive()) {
+      wrapperClass += " MenuActive";
       let menuItems = this.props.items.map((item, index) => {
         return (
           <MenuItem item={item} key={index} doAction={this.props.action} />
@@ -42,7 +47,7 @@ class Menu extends Component {
       body = <div className="MenuBody">{menuItems}</div>;
     }
     return (
-      <div className="MenuWrapper">
+      <div className={wrapperClass}>
         <div className="MenuTitle" onClick={this.toggle}>
           {this.props.title}
         </div>

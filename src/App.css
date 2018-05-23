@@ -119,11 +119,17 @@ body {
   line-height: 20px;
   vertical-align: top;
   color: black;
-  padding: 0 6px;
   cursor: pointer;
   position: relative;
 }
 .MenuTitle {
+  height: 19px;
+  padding: 0 6px;
+}
+.MenuActive .MenuTitle {
+  background-color: #000080;
+  border-top: 1px solid #c0c0c0;
+  color: #fff;
 }
 .MenuTitle::first-letter {
   text-decoration: underline;
