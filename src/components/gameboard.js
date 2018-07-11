@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../App.css";
-import { arrayShuffle } from "../utility";
+import { shuffleArray } from "../utility";
 import Cell from "./cell";
 import Counter from "./counter";
 import FaceButton from "./facebutton";
@@ -307,7 +307,7 @@ class GameBoard extends Component {
       let isMine = i < this.props.data.numMines ? true : false;
       cells.push({ isMine: isMine, status: "hidden", id: i });
     }
-    cells = arrayShuffle(cells);
+    cells = shuffleArray(cells);
     cells = this.countMines(cells);
     if (this.state.interval) {
       clearInterval(this.state.interval);
