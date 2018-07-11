@@ -33,24 +33,22 @@ const cellRefs = [
 ];
 
 class GameBoard extends Component {
-  constructor(props) {
-    super(props);
-    this.isWin = this.isWin.bind(this);
-    this.isLoss = this.isLoss.bind(this);
-    this.endGame = this.endGame.bind(this);
-    this.handleCellClick = this.handleCellClick.bind(this);
-    this.setGuess = this.setGuess.bind(this);
-    this.handleReset = this.handleReset.bind(this);
-    this.showCell = this.showCell.bind(this);
-    this.flagCell = this.flagCell.bind(this);
-    this.doubleClickCell = this.doubleClickCell.bind(this);
-    this.clearCell = this.clearCell.bind(this);
-    this.clearCells = this.clearCells.bind(this);
-    this.getCells = this.getCells.bind(this);
-    this.countMines = this.countMines.bind(this);
-    this.startAtZero = this.startAtZero.bind(this);
-    this.setup = this.setup.bind(this);
-    this.updateTimer = this.updateTimer.bind(this);
+  constructor (props){
+    super(props)
+    this.isWin = this.isWin.bind(this)
+    this.isLoss = this.isLoss.bind(this)
+    this.setGuess = this.setGuess.bind(this)
+    this.handleReset = this.handleReset.bind(this)
+    this.showCell = this.showCell.bind(this)
+    this.flagCell = this.flagCell.bind(this)
+    this.doubleClickCell = this.doubleClickCell.bind(this)
+    this.clearCell = this.clearCell.bind(this)
+    this.clearCells = this.clearCells.bind(this)
+    this.getCells = this.getCells.bind(this)
+    this.countMines = this.countMines.bind(this)
+    this.startAtZero = this.startAtZero.bind(this)
+    this.setup = this.setup.bind(this)
+    this.updateTimer = this.updateTimer.bind(this)
     this.state = {
       cells: [],
       status: "active",
@@ -91,40 +89,8 @@ class GameBoard extends Component {
     }
   }
 
-  endGame(status, cells) {
-    clearInterval(this.state.interval);
-    cells = cells ? cells : this.cells;
-    this.setState({
-      status: status,
-      interval: null,
-      cells: cells,
-      ended: Date.now()
-    });
-  }
-
-  handleCellClick(cellId, clickType) {
-    if (this.status === "win" || this.status === "loss") {
-      return;
-    }
-    console.log("handleCellClick called");
-    this.setState({ status: "active" });
-    switch (clickType) {
-      case "leftClick":
-        this.showCell(cellId);
-        break;
-      case "rightClick":
-        this.flagCell(cellId);
-        break;
-      case "doubleClick":
-        this.doubleClickCell(cellId);
-        break;
-      default:
-        console.log("handleCellClick did not get a valid clickType");
-    }
-  }
-
-  handleReset(e) {
-    if (this.state.interval) {
+  handleReset( e ){
+    if(this.state.interval){
       clearInterval(this.state.interval);
     }
     let cells = this.setup();
@@ -205,8 +171,7 @@ class GameBoard extends Component {
   clearCells(cellId, cellArray, checked) {
     let accum = checked || [];
     let clearCells = this.getCells(cellId);
-    clearCells.forEach(
-      function(subCellId) {
+    clearCells.forEach(subCellId => {
         cellArray[subCellId].status = "show";
         if (
           cellArray[subCellId].mineCount === 0 &&
@@ -215,7 +180,7 @@ class GameBoard extends Component {
           accum.push(subCellId);
           cellArray = this.clearCells(subCellId, cellArray, accum);
         }
-      }.bind(this)
+      }
     );
     return cellArray;
   }
@@ -227,7 +192,7 @@ class GameBoard extends Component {
     const width = this.props.data.width;
     const height = this.props.data.height;
 
-    cellRefs.forEach(function(func, funcIndex) {
+    cellRefs.forEach((func, funcIndex) => {
       //check if we are a cell on the left or right edge of the board
       const leftCol = cellId % width === 0 ? true : false;
       const rightCol = (cellId + 1) % width === 0 ? true : false;
@@ -284,47 +249,46 @@ class GameBoard extends Component {
     return cellArray;
   }
 
-  startAtZero(cellId) {
-    //get current cells
-    let cells = this.state.cells;
-    //get cells to clear out
-    let cellsAround = this.getCells(cellId);
-    cellsAround.push(cellId);
-    //get list of current zero cells making sure
-    //to exclude cells in the group we are clearing
-    let emptyCells = cells.reduce((accum, cell, index) => {
-      if (cell.isMine === false && cellsAround.indexOf(index) === -1) {
-        return [...accum, cell];
-      } else {
-        return accum;
-      }
-    }, []);
-    //for each cell in the group to clear we swap its
-    //isMine property with one from an empty cell
-    cellsAround.forEach(id => {
-      if (cells[id].isMine) {
-        //pick a random cell in the array of empty cells
-        let replaceId = Math.floor(Math.random() * emptyCells.length - 1);
-        //remove it from the array so we don't pick it twice
-        let replaceCell = emptyCells.splice(replaceId, 1)[0];
-        //swap the values
-        cells[id].isMine = false;
-        cells[replaceCell.id].isMine = true;
-      }
-    });
-    //reset the counted values of mines based on the new array
-    cells = this.countMines(cells);
-    cells[cellId].status = "show";
-    cells = this.clearCells(cellId, cells);
-    //reset state and then clear the original cell that was clicked
-    //set start time so we can diff when we need to
-    let timer = Date.now();
-    this.setState({
-      cells: cells,
-      started: true,
-      timer: timer,
-      interval: setInterval(this.updateTimer, 1000)
-    });
+  startAtZero( cellId ){
+      //get current cells
+      let cells = this.state.cells;
+      //get cells to clear out
+      // let cellsAround = this.getCells(cellId);
+      // cellsAround.push(cellId);
+      let cellsAround = [cellId];
+      //get list of current zero cells making sure
+      //to exclude cells in the group we are clearing
+      let emptyCells = cells.reduce( (accum, cell, index)=>{
+        if(cell.isMine === false && cellsAround.indexOf(index) === -1){
+          return [...accum, cell];
+        }else{
+          return accum;
+        }
+      }, []);
+      //for each cell in the group to clear we swap its
+      //isMine property with one from an empty cell
+      cellsAround.forEach( (id) => {
+        if(cells[id].isMine){
+          //pick a random cell in the array of empty cells
+          let replaceId = Math.floor( Math.random() * emptyCells.length-1 );
+          //remove it from the array so we don't pick it twice
+          let replaceCell = emptyCells.splice(replaceId, 1)[0];
+          //swap the values
+          cells[id].isMine = false;
+          cells[replaceCell.id].isMine = true;
+        }
+      });
+      //reset the counted values of mines based on the new array
+      cells = this.countMines(cells);
+      cells[cellId].status = "show";
+
+      cells = this.clearCell( cells, cellId );
+      //cells = this.clearCells( cellId, cells);
+      //reset state and then clear the original cell that was clicked
+      //set start time so we can diff when we need to
+      let timer = Date.now();
+      let interval = setInterval( this.updateTimer, 1000 );
+      this.setState({ cells: cells, started: true, timer: timer, interval: interval });
   }
 
   setGuess() {

@@ -13,13 +13,18 @@ class App extends Component {
     this.menuInput = this.menuInput.bind(this);
     this.state = {
       activeMenu: false,
-      width: 10,
-      height: 10,
+      boardWidth: 10,
+      boardHeight: 10,
       numMines: 8,
       current: "Beginner",
       game: Date.now(),
-      gameModes,
-      menus,
+      cells: [],
+      debug: false,
+      ended: false,
+      interval: null,
+      started: false,
+      status: 'active',
+      timer: null,
     };
   }
 
@@ -62,6 +67,7 @@ class App extends Component {
   setGame(action) {
     const config = gameModes[action];
     const game = Date.now();
+
     this.setState({
       width: config.width,
       height: config.height,
@@ -81,13 +87,6 @@ class App extends Component {
   }
 
   render() {
-    // let toRender = {};
-    // if(this.state.menuActive){
-    //   toRender = ( <Menu menuActive={this.state.menuActive} setBoard={this.setBoard} /> );
-    // }else{
-    //   toRender = (  );
-    // }
-
     return (
       <div className="App">
         <div className="outerBorder">

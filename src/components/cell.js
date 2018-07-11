@@ -30,7 +30,10 @@ class Cell extends Component {
 
   handleClickUp(e) {
     e.preventDefault();
-    if (this.state.LMB && this.state.RMB) {
+    if(this.props.gameStatus==="win" ||this.props.gameStatus ==="loss"){
+      return;
+    }
+    if( this.state.LMB && this.state.RMB ){
       //do double click
       this.fastClear(e);
     } else if (this.state.LMB) {
@@ -45,13 +48,13 @@ class Cell extends Component {
 
   handleClickDown(e) {
     e.preventDefault();
-    if (this.props.gameStatus === "win" || this.props.gameStatus === "loss") {
+    if(this.props.gameStatus==="win" ||this.props.gameStatus ==="loss"){
       return;
     }
-    if (e.buttons === 3) {
-      this.setState({ LMB: true, RMB: true });
-    } else if (e.buttons === 1) {
-      this.setState({ LMB: true });
+    if(e.buttons === 3){
+      this.setState({LMB: true, RMB: true});
+    }else if(e.buttons === 1){
+      this.setState({LMB: true});
       this.props.setGuess();
     } else if (e.buttons === 2) {
       this.setState({ RMB: true });
