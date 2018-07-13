@@ -1,4 +1,4 @@
-export default {
+export const gameModes : GameModesConfig = {
     "set-beginner": { 
         title: "Beginner",
         height: 8,
@@ -18,3 +18,16 @@ export default {
         numMines: 99 ,
     },
   };
+
+export type GameModesConfig = {
+   [K in GameModePresets]: GameMode
+}
+
+export type GameModePresets = 'set-beginner'|'set-intermediate'|'set-expert'
+
+export interface GameMode {
+    title: string
+    height: number
+    width: number
+    numMines: number
+}

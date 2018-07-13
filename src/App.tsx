@@ -1,12 +1,43 @@
-import React, { Component } from "react";
-import Menu from "./components/menu";
-import GameBoard from "./components/gameboard";
 import "./App.css";
-import gameModes from "./config/game-modes";
-import menus from "./config/menus";
+import * as React from "react";
+import { GameBoard, Menu, GameBoardProps } from './components'
 
-class App extends Component {
-  constructor(props) {
+import { gameModes, GameModePresets, GameMode } from "./config/game-modes";
+import { menus, AllMenuActions, GameMenus } from "./config/menus";
+
+export interface AppProps {
+  [key: string] : any
+}
+
+export interface AppState extends GameBoardState {
+  activeMenu: string|boolean
+  current: string
+  game: number
+  interval: NodeJS.Timer|null
+  status: string
+}
+
+export interface GameBoardState {
+  cells: ICell[]
+  started: number
+  ended: number
+  timer: number
+  debug: boolean
+  numMines: number
+  boardHeight: number
+  boardWidth: number
+}
+
+
+export interface ICell {
+  isMine: boolean
+  id: number
+  mineCount: number
+  status: string
+}
+
+class App extends React.Component<AppProps, AppState> {
+  constructor(props : any) {
     super(props);
     this.setBoard = this.setBoard.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
@@ -18,17 +49,17 @@ class App extends Component {
       cells: [],
       current: "Beginner",
       debug: false,
-      ended: false,
+      ended: 0,
       game: Date.now(),
       interval: null,
       numMines: 8,
-      started: false,
+      started: 0,
       status: 'active',
-      timer: null,
+      timer: 0,
     };
   }
 
-  toggleMenu(type) {
+  toggleMenu(type: GameMenus) {
     if (this.state.activeMenu === type) {
       this.setState({ activeMenu: false });
     } else {
@@ -36,7 +67,7 @@ class App extends Component {
     }
   }
 
-  menuInput(action) {
+  menuInput(action: AllMenuActions) {
     console.log(action);
     switch (action) {
       case "set-beginner":
@@ -54,7 +85,7 @@ class App extends Component {
       case "open-preferences":
         break;
       case "close":
-        this.menuActive = false;
+        // not sure if we need to do something here, menu closes on any action
         break;
       case "open-about":
         break;
@@ -64,26 +95,41 @@ class App extends Component {
     this.setState({ activeMenu: false });
   }
 
-  setGame(action) {
+  setGame(action: GameModePresets) {
     const config = gameModes[action];
     const game = Date.now();
 
     this.setState({
-      width: config.width,
-      height: config.height,
+      boardWidth: config.width,
+      boardHeight: config.height,
       numMines: config.numMines,
       current: config.title,
       game: game
     });
   }
 
-  setBoard(config) {
+  setBoard(config: GameMode) {
     this.setState({
-      width: config.width,
-      height: config.height,
+      boardWidth: config.width,
+      boardHeight: config.height,
       numMines: config.numMines,
-      menuActive: false
+      activeMenu: false
     });
+  }
+
+  getGameBoardProps() : GameBoardProps {
+    const { cells, started, ended, timer, debug, numMines, boardHeight, boardWidth } = this.state
+    return {
+      cells,
+      started,
+      ended,
+      timer,
+      debug,
+      numMines,
+      boardHeight,
+      boardWidth,
+      resetGame: () => {}
+    }
   }
 
   render() {
@@ -103,23 +149,21 @@ class App extends Component {
           <div className="MenuBar">
             <Menu
               title="game"
-              items={menus.gameMenu}
+              items={menus.game}
               toggle={this.toggleMenu}
               active={this.state.activeMenu}
               action={this.menuInput}
             />
             <Menu
               title="help"
-              items={menus.helpMenu}
+              items={menus.help}
               toggle={this.toggleMenu}
               active={this.state.activeMenu}
               action={this.menuInput}
             />
           </div>
           <GameBoard
-            data={this.state}
-            openMenu={this.openMenu}
-            key={this.game}
+            { ...this.getGameBoardProps() }
           />
         </div>
       </div>

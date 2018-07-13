@@ -7,6 +7,15 @@
     ]
   },
   "rules": {
-    "no-console": ["warn"]
+    "no-console": {
+      "severity": "warning",
+      "options": ["log"]
+    },
+    "ordered-imports": {
+      "import-sources-order" : "any",
+      "grouped-imports": "false",
+      "named-imports-order" : "case-insensitive",
+      "module-source-path": "basename"
+    }
   }
 }
